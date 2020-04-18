@@ -1,0 +1,49 @@
+local h = require "utilities.h"
+local utilities = require "utilities.utilities"
+local guest_manager = require "guest.guest_manager"
+local pathfinder = require "utilities.pathfinder"
+
+local function assign_new_random_positions(self)
+
+	for object, info in pairs(guest_manager.guests) do
+		if not pathfinder.is_walk_in_progress(object) and object ~= self.clicked_object and math.random() > 0.5 then
+			guest_manager.assign_random_position(object)
+		end
+	end
+end
+
+function init(self)
+	
+	--spawn
+	for i=1,2 do
+		guest_manager.spawn_guest()
+	end
+
+	--assign initial positions
+	for object, info in pairs(guest_manager.guests) do
+		guest_manager.assign_random_position(object)
+	end
+
+	self.movement_timer = timer.delay(1, true, assign_new_random_positions)
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	guest_manager.tick_guest_needs(dt)
+	
+	self.clicked_object = guest_manager.check_guest_clicks()
+	if self.clicked_object then
+		msg.post("player", "go_to", {position = pathfinder.get_walk_destination(self.clicked_object)})
+		msg.post("player", "guest_target", {id = self.clicked_object})
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == h.RELEASE_TARGET then
+		self.clicked_object = nil
+	end
+end

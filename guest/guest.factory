@@ -1,0 +1,2 @@
+prototype: "/guest/guest.go"
+load_dynamically: false

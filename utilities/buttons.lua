@@ -17,14 +17,15 @@ M.buttons = {}
 ---scale_default_amount / scale_default_time / scale_default_easing / scale_default_playback
 ---
 ---(same available for over, down, released)
-function M.add_button(node, params, boop)
+function M.add_button(id, node, params)
 
-    if M.buttons[node] then
-        print("BUTTONS: Warning - button id " .. node .. " already exists. Overwriting")
+    if M.buttons[id] then
+        print("BUTTONS: Warning - button id " .. id .. " already exists. Overwriting")
     end
 
     local button = {}
     button.node = node
+    button.disabled = false
 
     --flipbook
     local flipbook_default = params.flipbook_default or gui.get_flipbook(node)
@@ -58,33 +59,46 @@ function M.add_button(node, params, boop)
     button.doubleclick_time = params.doubleclick_time or 0 --0.25 is reasonable
     button.last_released = 0
 
-    M.buttons[node] = button
+    M.buttons[id] = button
 
-    pprint(M.buttons[node])
-    return node
+    return id
+end
+
+function M.find_button_from_node(node)
+    for id, button in pairs(M.buttons) do
+        if button.node == node then
+            return id
+        end
+    end
 end
 
 function M.complete_button_scaling(self, node)
-    if M.buttons[node] then
-        M.buttons[node].scaling_mode = nil
+    local id = M.find_button_from_node(node)
+    if M.buttons[id] then
+        M.buttons[id].scaling_mode = nil
     end
 end
 
-function M.check_button(node)
+function M.check_button(id)
 
-    local button = M.buttons[node]
+    local button = M.buttons[id]
     if not button then
-        print ("BUTTONS: Error - no button id " .. node)
-        return
+        print ("BUTTONS: Error - no button id " .. id)
+        return {released = false, over = false, down = false, doubleclick = false}
     end
 
+    if button.disabled then
+        return {released = false, over = false, down = false, doubleclick = false}
+    end
+
+    local node = button.node
     local over = false
     local down = false
     local released = false
     local last_released = button.last_released
     local doubleclick = false
 
-    if gui.pick_node(node, input.mouse_location.x, input.mouse_location.y) then
+    if gui.pick_node(node, input.gui_mouse_location.x, input.gui_mouse_location.y) then
         over = true
     end
 
@@ -140,8 +154,31 @@ function M.check_button(node)
     return {over = over, down = down, released = released, doubleclick = doubleclick}
 end
 
-function M.remove_button(node)
+function M.get_button_node(id)
 
+    local button = M.buttons[id]
+    if not button then
+        print ("BUTTONS: Error - no button id " .. id)
+        return
+    end
+
+    return button.node
+end
+
+function M.remove_button(id)
+
+    M.buttons[id] = nil
+end
+
+function M.disable_button(id)
+
+    -- print("BUTTONS: disabled", id)
+    M.buttons[id].disabled = true
+end
+
+function M.enable_button(id)
+
+    M.buttons[id].disabled = false
 end
 
 function M.remove_all_buttons()

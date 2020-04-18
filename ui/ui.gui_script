@@ -1,0 +1,150 @@
+local h = require "utilities.h"
+local buttons = require "utilities.buttons"
+local party_supplies = require "party_supplies.party_supplies"
+local guest_manager = require "guest.guest_manager"
+
+local function animate_action(self, icon_id, action_time, action_id)
+
+	local intro_anim_time = 1
+	local completion_wobble_time = 0.5
+	local completion_wobble_rest_time = 0.1
+	local completion_fade_time = 0.3
+
+	--animate in background
+	gui.set_scale(self.action, vmath.vector3(0.01,0.01,0.01))
+	gui.set_enabled(self.action, true)
+	gui.animate(self.action, gui.PROP_SCALE, vmath.vector3(1,1,1), gui.EASING_OUTELASTIC, intro_anim_time, 0, nil, gui.PLAYBACK_ONCE_FORWARD)
+
+	--reset stencil
+	local size = gui.get_size(self.action_progress)
+	size.y = 0
+	gui.set_size(self.action_progress, size)
+
+	--set icon
+	gui.play_flipbook(self.action_icon, icon_id)
+
+	--animate stencil progress
+	gui.animate(self.action_progress, "size.y", size.x, gui.EASING_INOUTCUBIC, action_time, 0, nil, gui.PLAYBACK_ONCE_FORWARD)
+	
+	--notify player completion
+	self.action_id = action_id
+	local function notify_player(self)
+		msg.post("player", "action_complete", {action_id = self.action_id})
+	end
+	timer.delay(action_time, false, notify_player)
+
+	--animate back out
+	local function completion_wobble(self)
+		gui.animate(self.action, gui.PROP_SCALE, vmath.vector3(1.25, 1.25, 1.,25), gui.EASING_OUTELASTIC, completion_wobble_time, 0, nil, gui.PLAYBACK_ONCE_FORWARD)
+	end
+	timer.delay(action_time-completion_wobble_time, false, completion_wobble)
+
+	local function completion_fade(self)
+		gui.animate(self.action, gui.PROP_SCALE, vmath.vector3(0.01,0.01,0.01), gui.EASING_INOUTCUBIC, completion_fade_time)
+	end
+	timer.delay(action_time+completion_wobble_rest_time, false, completion_fade)
+
+	local function disable_action(self)
+		gui.set_enabled(self.action, false)
+	end
+	timer.delay(action_time+completion_wobble_rest_time+completion_fade_time, false, disable_action)
+end
+
+local function wobble_node(self, node, amount, time)
+
+	amount = amount or 1.5
+	time = time or 1.5
+
+	gui.set_scale(node, vmath.vector3(1,1,1))
+
+	local function return_scale(self, node)
+		gui.animate(node, gui.PROP_SCALE, vmath.vector3(1,1,1), gui.EASING_OUTCUBIC, time*0.5)
+	end
+
+	gui.animate(node, gui.PROP_SCALE, amount, gui.EASING_OUTELASTIC, time*0.5, 0, return_scale, gui.PLAYBACK_ONCE_FORWARD)
+end
+
+local function highlight_node(self, node, amount, time)
+
+	amount = amount or 1.25
+	time = time or 1
+
+	gui.set_scale(node, vmath.vector3(1,1,1))
+
+	gui.animate(node, gui.PROP_SCALE, amount, gui.EASING_INOUTCUBIC, time, 0, nil, gui.PLAYBACK_LOOP_PINGPONG)
+end
+
+local function hide_button(self, id)
+
+	buttons.disable_button(id)
+
+	local node = buttons.get_button_node(id)
+
+	gui.animate(node, gui.PROP_SCALE, vmath.vector3(0.01,0.01,0.01), gui.EASING_INOUTCUBIC, 1)
+end
+
+local function show_button(self, id)
+
+	buttons.enable_button(id)
+
+	local node = buttons.get_button_node(id)
+
+	gui.animate(node, gui.PROP_SCALE, vmath.vector3(1,1,1), gui.EASING_OUTELASTIC, 1)
+end
+
+function init(self)
+
+	--buttons
+	local default_params = {flipbook_down = hash("cocktail_down"), scale_over_amount = 1.05, scale_over_time = 2, scale_over_easing = gui.EASING_INOUTCUBIC, scale_over_playback = gui.PLAYBACK_LOOP_PINGPONG, scale_down_amount = 0.9, scale_down_time = 0.2, scale_released_amount = 1, scale_released_time = 0.75, scale_released_easing = gui.EASING_OUTELASTIC, scale_released_playback = gui.PLAYBACK_ONCE_FORWARD}
+
+	default_params.flipbook_down = hash("cocktail_down")
+	self.cocktail = buttons.add_button(h.COCKTAIL, gui.get_node("cocktail"), default_params)
+
+	default_params.flipbook_down = hash("bottle_down")
+	self.bottle = buttons.add_button(h.BOTTLE, gui.get_node("bottle"), default_params)
+
+
+	--action
+	self.action = gui.get_node("action")
+	gui.set_enabled(self.action, false)
+
+	self.action_progress = gui.get_node("progress")
+	self.action_icon = gui.get_node("icon")
+
+	self.inventory_cocktail = gui.get_node("inventory_cocktail")
+	self.inventory_powder = gui.get_node("inventory_powder")
+end
+
+function final(self)
+end
+
+function update(self, dt)
+	
+	if buttons.check_button(h.COCKTAIL).released then
+		msg.post("player", "go_to", {position = party_supplies.positions[h.COCKTAIL]})
+		msg.post("player", "queued_action", {action = h.COCKTAIL})
+	end
+	if buttons.check_button(h.BOTTLE).released then
+		msg.post("player", "go_to", {position = party_supplies.positions[h.BOTTLE]})
+		msg.post("player", "queued_action", {action = h.BOTTLE})
+	end
+
+	--inventory
+	gui.set_text(self.inventory_cocktail, party_supplies.cocktails)
+	gui.set_text(self.inventory_powder, party_supplies.powder)
+end
+
+function on_message(self, message_id, message, sender)
+	
+	if message_id == h.ACTION then
+		animate_action(self, message.icon_id, message.action_time, message.action_id)
+	elseif message_id == h.WOBBLE_NODE then
+		wobble_node(self, gui.get_node(message.node))
+	elseif message_id == h.HIGHLIGHT_NODE then
+		highlight_node(self, gui.get_node(message.node))
+	elseif message_id == h.HIDE_BUTTON then
+		hide_button(self, message.id)
+	elseif message_id == h.SHOW_BUTTON then
+		show_button(self, message.id)
+	end
+end
