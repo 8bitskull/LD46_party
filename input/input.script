@@ -1,4 +1,5 @@
 
+local rendercam = require "rendercam.rendercam"
 local input = require "input.input"
 local h = require "utilities.h"
 
@@ -23,7 +24,8 @@ function on_input(self, action_id, action)
 	-- pprint(action)
 
 	if action_id == nil then
-		input.mouse_location = vmath.vector3(action.x, action.y, 0)
+		input.gui_mouse_location = vmath.vector3(action.x, action.y, 0)
+		input.mouse_location = rendercam.screen_to_world_2d(action.x, action.y)
 	else
 		input[action_id] = action
 	end

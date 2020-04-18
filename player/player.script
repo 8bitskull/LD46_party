@@ -1,0 +1,28 @@
+
+local input = require "input.input"
+local h = require "utilities.h"
+local pathfinder = require "utilities.pathfinder"
+
+function init(self)
+
+	self.my_id = go.get_id()
+
+	pathfinder.walk_to(self.my_id, go.get_position(), vmath.vector3(-475,-43,0))
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	
+	if input.check(h.TOUCH).pressed then
+		pathfinder.walk_to(self.my_id, go.get_position(), input.mouse_location, true)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Remove this function if not needed
+end

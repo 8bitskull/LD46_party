@@ -3,8 +3,6 @@ local h = require "utilities.h"
 
 function init(self)
 
-	print("beeop")
-
 	local x, y, w, h = defos.get_window_size()
 	defos.set_window_size(x-1400, y, w, h)
 
