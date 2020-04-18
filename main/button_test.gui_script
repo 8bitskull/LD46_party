@@ -1,0 +1,36 @@
+
+local buttons = require "utilities.buttons"
+
+function init(self)
+
+	print("game collection loaded")
+
+	self.button = buttons.add_button(gui.get_node("box"), {flipbook_over = hash("green_button09"), flipbook_down = hash("green_button08"), scale_over_amount = 1.05, scale_over_time = 2, scale_over_easing = gui.EASING_INOUTCUBIC, scale_over_playback = gui.PLAYBACK_LOOP_PINGPONG, scale_down_amount = 0.8, scale_down_time = 0.2, scale_released_amount = 1, scale_released_time = 0.5, scale_released_easing = gui.EASING_OUTELASTIC, scale_released_playback = gui.PLAYBACK_ONCE_FORWARD})
+	
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	if buttons.check_button(self.button).doubleclick then
+		print("doubler!")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add input-handling code here
+	-- Remove this function if not needed
+end

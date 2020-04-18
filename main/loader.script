@@ -1,0 +1,31 @@
+
+local h = require "utilities.h"
+
+function init(self)
+
+	local x, y, w, h = defos.get_window_size()
+	defos.set_window_size(x-1400, y, w, h)
+
+	msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
+
+	--just start the game
+	msg.post("#game", "load")
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	-- Add update code here
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	
+	if message_id == h.PROXY_LOADED then
+		msg.post(sender, "init")
+        msg.post(sender, "enable")
+	end
+end

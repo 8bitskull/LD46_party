@@ -1,0 +1,30 @@
+
+local input = require "input.input"
+local h = require "utilities.h"
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+end
+
+function final(self)
+	msg.post(".", "release_input_focus")
+end
+
+function update(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	-- print(action_id)
+	-- pprint(action)
+
+	if action_id == nil then
+		input.mouse_location = vmath.vector3(action.x, action.y, 0)
+	else
+		input[action_id] = action
+	end
+end
