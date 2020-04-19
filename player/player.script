@@ -31,12 +31,34 @@ end
 
 local function check_for_action_trigger(self)
 
-	local position = go.get_position()
-	if vmath.length_sqr(party_supplies.positions[self.queued_action] - position) < 10 and pathfinder.get_location(position) == party_supplies.locations[self.queued_action] then
+	if self.queued_action == h.TALK then
 
 		msg.post("ui", "action", {action_id = self.queued_action, icon_id = party_supplies.icon_ids[self.queued_action], action_time = party_supplies.action_times[self.queued_action]})
-		self.allow_actions = false
 		self.queued_action = nil
+
+	else
+		local position = go.get_position()
+		if vmath.length_sqr(party_supplies.positions[self.queued_action] - position) < 10 and pathfinder.get_location(position) == party_supplies.locations[self.queued_action] then
+
+			msg.post("ui", "action", {action_id = self.queued_action, icon_id = party_supplies.icon_ids[self.queued_action], action_time = party_supplies.action_times[self.queued_action]})
+			self.allow_actions = false
+			self.queued_action = nil
+		end
+	end
+end
+
+local function check_for_guest_trigger(self)
+
+	if not self.allow_actions then
+		return
+	end
+
+	local guest_position = go.get_position(self.guest_target)
+	local position = go.get_position()
+	if vmath.length_sqr(guest_position - position) < 10 and pathfinder.get_location(position) == pathfinder.get_location(guest_position) then
+
+		msg.post("ui", "load_character", {object = self.guest_target})
+		self.allow_actions = false
 	end
 end
 
@@ -46,22 +68,37 @@ local function complete_action(self, action_id)
 		party_supplies.make_cocktail()
 	elseif action_id == h.BOTTLE then
 		party_supplies.replenish_drink_stocks()
+	elseif action_id == h.MUSIC then
+		party_supplies.switch_music()
+	elseif action_id == h.TALK then
+		print("talk completed")
+		if self.guest_target then
+			msg.post("guest_runner", "release_target", {id = self.guest_target})
+			self.guest_target = nil
+		end
+	elseif action_id == h.PHONE then
+		party_supplies.request_powder()
+	elseif action_id == h.POWDER then
+		party_supplies.collect_powder()
 	end
 end
 
 function init(self)
 
+	party_supplies.set_variables()
+
 	self.my_id = go.get_id()
 
 	self.previous_position = go.get_position()
 
-	self.walk_speed = pathfinder.walk_speed * 2
-
-	-- pathfinder.walk_to(self.my_id, go.get_position(), vmath.vector3(-475,-43,0))
+	self.walk_speed = pathfinder.walk_speed * 3
 
 	go.set("#sprite", "blend", vmath.vector4(1,0.8,0.2,1))
 
 	self.allow_actions = true
+
+	--hide phone in beginning
+	msg.post("ui", "hide_button", {id = h.PHONE, hide_immediately = true})
 end
 
 function final(self)
@@ -69,7 +106,7 @@ end
 
 function update(self, dt)
 	
-	if input.check(h.MOUSE_BUTTON_RIGHT).pressed then
+	if input.check(h.MOUSE_BUTTON_RIGHT).pressed and self.allow_actions then
 		pathfinder.walk_to(self.my_id, go.get_position(), input.mouse_location, false, self.walk_speed)
 
 		if self.queued_action then
@@ -88,6 +125,11 @@ function update(self, dt)
 	if self.queued_action then
 		check_for_action_trigger(self)
 	end
+
+	if self.guest_target then
+		check_for_guest_trigger(self)
+	end
+
 end
 
 function on_message(self, message_id, message, sender)
@@ -104,5 +146,16 @@ function on_message(self, message_id, message, sender)
 		complete_action(self, message.action_id)
 	elseif message_id == h.GUEST_TARGET then
 		self.guest_target = message.id
+	elseif message_id == h.GUEST_COMPLETE then
+		if self.queued_action ~= h.TALK then
+			self.allow_actions = true
+			msg.post("guest_runner", "release_target", {id = self.guest_target})
+			self.guest_target = nil
+		end
+	elseif message_id == h.TRIGGER_TALK then
+		self.queued_action = h.TALK
+		if self.guest_target then
+			guest_manager.guests[self.guest_target].talk = 100
+		end
 	end
 end

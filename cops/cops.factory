@@ -1,0 +1,2 @@
+prototype: "/cops/cops.go"
+load_dynamically: false

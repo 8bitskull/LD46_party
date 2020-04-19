@@ -1,3 +1,4 @@
+local input = require "input.input"
 local h = require "utilities.h"
 local buttons = require "utilities.buttons"
 local party_supplies = require "party_supplies.party_supplies"
@@ -26,6 +27,11 @@ local function animate_action(self, icon_id, action_time, action_id)
 	--animate stencil progress
 	gui.animate(self.action_progress, "size.y", size.x, gui.EASING_INOUTCUBIC, action_time, 0, nil, gui.PLAYBACK_ONCE_FORWARD)
 	
+	--play sound
+	if party_supplies.action_sounds[action_id] ~= nil then
+		sound.play(party_supplies.action_sounds[action_id])
+	end
+
 	--notify player completion
 	self.action_id = action_id
 	local function notify_player(self)
@@ -74,13 +80,17 @@ local function highlight_node(self, node, amount, time)
 	gui.animate(node, gui.PROP_SCALE, amount, gui.EASING_INOUTCUBIC, time, 0, nil, gui.PLAYBACK_LOOP_PINGPONG)
 end
 
-local function hide_button(self, id)
+local function hide_button(self, id, hide_immediately)
 
 	buttons.disable_button(id)
 
 	local node = buttons.get_button_node(id)
 
-	gui.animate(node, gui.PROP_SCALE, vmath.vector3(0.01,0.01,0.01), gui.EASING_INOUTCUBIC, 1)
+	if hide_immediately then
+		gui.set_scale(node, vmath.vector3(0.01,0.01,0.01))
+	else
+		gui.animate(node, gui.PROP_SCALE, vmath.vector3(0.01,0.01,0.01), gui.EASING_INOUTCUBIC, 1)
+	end
 end
 
 local function show_button(self, id)
@@ -92,16 +102,78 @@ local function show_button(self, id)
 	gui.animate(node, gui.PROP_SCALE, vmath.vector3(1,1,1), gui.EASING_OUTELASTIC, 1)
 end
 
+local function set_character_bars(self, object)
+
+	local size = gui.get_size(self.character_cocktail_bar)
+	size.y = guest_manager.guests[object].booze / 100 * size.x
+	gui.set_size(self.character_cocktail_bar, size)
+	size.y = guest_manager.guests[object].dance / 100 * size.x
+	gui.set_size(self.character_music_bar, size)
+	size.y = guest_manager.guests[object].talk / 100 * size.x
+	gui.set_size(self.character_talk_bar, size)
+	size.y = guest_manager.guests[object].powder / 100 * size.x
+	gui.set_size(self.character_powder_bar, size)
+end
+
+local function load_character(self, object)
+
+	gui.set_scale(self.character_menu, vmath.vector3(0.01,0.01,0.01))
+	gui.set_enabled(self.character_menu, true)
+	gui.animate(self.character_menu, gui.PROP_SCALE, 1, gui.EASING_OUTCUBIC, 0.5)
+
+	self.loaded_character = object
+
+	set_character_bars(self, self.loaded_character)
+
+	buttons.enable_button(h.CHARACTER_COCKTAIL)
+	buttons.enable_button(h.CHARACTER_MUSIC)
+	buttons.enable_button(h.CHARACTER_TALK)
+	buttons.enable_button(h.CHARACTER_POWDER)
+	buttons.enable_button(h.CHARACTER_CLOSE)
+
+
+	gui.set_color(gui.get_node("character"), guest_manager.guests[object].color)
+end
+
+local function close_character(self)
+
+	
+	local function complete_close(self)
+		buttons.disable_button(h.CHARACTER_COCKTAIL)
+		buttons.disable_button(h.CHARACTER_MUSIC)
+		buttons.disable_button(h.CHARACTER_TALK)
+		buttons.disable_button(h.CHARACTER_POWDER)
+		buttons.disable_button(h.CHARACTER_CLOSE)
+		self.loaded_character = nil
+		gui.set_enabled(self.character_menu, false)
+	end
+
+	gui.animate(self.character_menu, gui.PROP_SCALE, 0.01, gui.EASING_INCUBIC, 0.25, 0, complete_close)
+
+	msg.post("player", "guest_complete")
+end
+
 function init(self)
 
 	--buttons
-	local default_params = {flipbook_down = hash("cocktail_down"), scale_over_amount = 1.05, scale_over_time = 2, scale_over_easing = gui.EASING_INOUTCUBIC, scale_over_playback = gui.PLAYBACK_LOOP_PINGPONG, scale_down_amount = 0.9, scale_down_time = 0.2, scale_released_amount = 1, scale_released_time = 0.75, scale_released_easing = gui.EASING_OUTELASTIC, scale_released_playback = gui.PLAYBACK_ONCE_FORWARD}
+	local default_params = {flipbook_down = hash("cocktail_down"), scale_over_amount = 1.1, scale_over_time = 1, scale_over_easing = gui.EASING_INOUTCUBIC, scale_over_playback = gui.PLAYBACK_LOOP_PINGPONG, scale_down_amount = 0.9, scale_down_time = 0.2, scale_released_amount = 1, scale_released_time = 0.75, scale_released_easing = gui.EASING_OUTELASTIC, scale_released_playback = gui.PLAYBACK_ONCE_FORWARD}
 
 	default_params.flipbook_down = hash("cocktail_down")
 	self.cocktail = buttons.add_button(h.COCKTAIL, gui.get_node("cocktail"), default_params)
 
 	default_params.flipbook_down = hash("bottle_down")
 	self.bottle = buttons.add_button(h.BOTTLE, gui.get_node("bottle"), default_params)
+	msg.post(".", "hide_button", {id = h.BOTTLE, hide_immediately = true})
+
+	default_params.flipbook_down = hash("button_music_down")
+	self.music = buttons.add_button(h.MUSIC, gui.get_node("music"), default_params)
+
+	default_params.flipbook_down = hash("phone_down")
+	self.phone = buttons.add_button(h.PHONE, gui.get_node("phone"), default_params)
+
+	default_params.flipbook_down = hash("button_powder_down")
+	self.powder = buttons.add_button(h.POWDER, gui.get_node("powder"), default_params)
+	msg.post(".", "hide_button", {id = h.POWDER, hide_immediately = true})
 
 
 	--action
@@ -113,6 +185,32 @@ function init(self)
 
 	self.inventory_cocktail = gui.get_node("inventory_cocktail")
 	self.inventory_powder = gui.get_node("inventory_powder")
+
+
+	--character
+	self.character_menu = gui.get_node("character_menu")
+	self.character_cocktail_bar = gui.get_node("char_cocktail_bar")
+	self.character_music_bar = gui.get_node("char_music_bar")
+	self.character_talk_bar = gui.get_node("char_talk_bar")
+	self.character_powder_bar = gui.get_node("char_powder_bar")
+
+	default_params.flipbook_down = hash("button_close_down")
+	self.character_close = buttons.add_button(h.CHARACTER_CLOSE, gui.get_node("char_close"), default_params)
+
+	default_params.flipbook_down = nil
+	self.character_cocktail = buttons.add_button(h.CHARACTER_COCKTAIL, gui.get_node("char_cocktail_icon"), default_params)
+	buttons.disable_button(h.CHARACTER_COCKTAIL)
+
+	self.character_music = buttons.add_button(h.CHARACTER_MUSIC, gui.get_node("char_music_icon"), default_params)
+	buttons.disable_button(h.CHARACTER_MUSIC)
+
+	self.character_talk = buttons.add_button(h.CHARACTER_TALK, gui.get_node("char_talk_icon"), default_params)
+	buttons.disable_button(h.CHARACTER_TALK)
+
+	self.character_powder = buttons.add_button(h.CHARACTER_POWDER, gui.get_node("char_powder_icon"), default_params)
+	buttons.disable_button(h.CHARACTER_POWDER)
+
+	gui.set_enabled(self.character_menu, false)
 end
 
 function final(self)
@@ -128,10 +226,68 @@ function update(self, dt)
 		msg.post("player", "go_to", {position = party_supplies.positions[h.BOTTLE]})
 		msg.post("player", "queued_action", {action = h.BOTTLE})
 	end
+	if buttons.check_button(h.MUSIC).released then
+		msg.post("player", "go_to", {position = party_supplies.positions[h.MUSIC]})
+		msg.post("player", "queued_action", {action = h.MUSIC})
+	end
+	if buttons.check_button(h.PHONE).released then
+		msg.post("player", "go_to", {position = party_supplies.positions[h.PHONE]})
+		msg.post("player", "queued_action", {action = h.PHONE})
+	end
+	if buttons.check_button(h.POWDER).released then
+		msg.post("player", "go_to", {position = party_supplies.positions[h.POWDER]})
+		msg.post("player", "queued_action", {action = h.POWDER})
+	end
 
 	--inventory
 	gui.set_text(self.inventory_cocktail, party_supplies.cocktails)
 	gui.set_text(self.inventory_powder, party_supplies.powder)
+
+	--character
+	if gui.is_enabled(self.character_menu) then
+
+		set_character_bars(self, self.loaded_character)
+
+		if buttons.check_button(self.character_cocktail).released then
+			if party_supplies.cocktails > 0 then
+				party_supplies.cocktails = party_supplies.cocktails - 1
+				wobble_node(self, gui.get_node("inventory_cocktail"))
+				wobble_node(self, gui.get_node("char_cocktail_icon"))
+				guest_manager.guests[self.loaded_character].booze = 100
+			else
+				wobble_node(self, gui.get_node("inventory_cocktail_symbol"))
+			end
+		elseif buttons.check_button(self.character_music).released then
+			if party_supplies.sound_system then
+
+			else
+				close_character(self)
+				msg.post("player", "go_to", {position = party_supplies.positions[h.MUSIC]})
+				msg.post("player", "queued_action", {action = h.MUSIC})
+			end
+		elseif buttons.check_button(self.character_talk).released then
+
+			guest_manager.guests[self.loaded_character].talk = 100
+			msg.post("player", "trigger_talk")
+			close_character(self)
+
+		elseif buttons.check_button(self.character_powder).released then
+			if party_supplies.powder > 0 then
+				party_supplies.powder = party_supplies.powder - 1
+				wobble_node(self, gui.get_node("inventory_powder"))
+				wobble_node(self, gui.get_node("char_powder_icon"))
+				guest_manager.guests[self.loaded_character].powder = 100
+				if party_supplies.powder == 0 then
+					msg.post("ui", "show_button", {id = h.PHONE})
+					msg.post("ui", "highlight_node", {node = "phone"})
+				end
+			else
+				wobble_node(self, gui.get_node("inventory_powder_symbol"))
+			end
+		elseif buttons.check_button(self.character_close).released then
+			close_character(self)
+		end
+	end
 end
 
 function on_message(self, message_id, message, sender)
@@ -143,8 +299,10 @@ function on_message(self, message_id, message, sender)
 	elseif message_id == h.HIGHLIGHT_NODE then
 		highlight_node(self, gui.get_node(message.node))
 	elseif message_id == h.HIDE_BUTTON then
-		hide_button(self, message.id)
+		hide_button(self, message.id, message.hide_immediately)
 	elseif message_id == h.SHOW_BUTTON then
 		show_button(self, message.id)
+	elseif message_id == h.LOAD_CHARACTER then
+		load_character(self, message.object)
 	end
 end

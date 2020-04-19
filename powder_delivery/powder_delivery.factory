@@ -1,0 +1,2 @@
+prototype: "/powder_delivery/powder_delivery.go"
+load_dynamically: false

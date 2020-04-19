@@ -1,0 +1,74 @@
+
+local h = require "utilities.h"
+local pathfinder = require "utilities.pathfinder"
+local party_supplies = require "party_supplies.party_supplies"
+
+local function manage_anim(self)
+
+	local position = go.get_position()
+
+	sprite.set_hflip("#sprite", position.x > self.previous_position.x)
+
+	self.previous_position = position
+end
+
+local function manage_time(self, dt)
+
+	if party_supplies.sound_system then
+		self.music_time = self.music_time + dt
+	else
+		self.music_time = self.music_time - dt
+	end
+
+	if self.music_time >= self.music_limit and not self.walking_to_door and party_supplies.sound_system then
+		self.walking_out = false
+		self.walking_to_door = true
+		pathfinder.walk_to(self.my_id, go.get_position(), vmath.vector3(pathfinder.door_x, pathfinder.downstairs_y, pathfinder.outdoors_z), true, self.walk_speed)
+	end
+
+	if not party_supplies.sound_system and self.walking_to_door and not self.walking_out then
+		self.walking_to_door = false
+		self.walking_out = true
+		pathfinder.walk_to(self.my_id, go.get_position(), vmath.vector3(pathfinder.offscreen_left_x, pathfinder.downstairs_y, pathfinder.outdoors_z), true, self.walk_speed)
+	end
+end
+
+function init(self)
+
+	self.music_time = 0
+	self.music_limit = 5
+
+	self.walk_speed = pathfinder.walk_speed * 0.5
+	self.previous_position = go.get_position()
+	self.my_id = go.get_id()
+
+	go.set_position(vmath.vector3(pathfinder.offscreen_left_x, pathfinder.downstairs_y , pathfinder.outdoors_z))
+
+	go.set("#sprite", "blend", vmath.vector4(0,0,1,1))
+
+	msg.post("#sprite", "play_animation", {id = hash("walk")})
+
+end
+
+function final(self)
+	party_supplies.cops = nil
+end
+
+function update(self, dt)
+	
+	manage_anim(self)
+	manage_time(self, dt)
+
+	if not pathfinder.is_walk_in_progress(self.my_id) then
+		if self.walking_out then
+			go.delete()
+		elseif self.walking_to_door then
+			msg.post("main:/loader", "gameover")
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Remove this function if not needed
+end

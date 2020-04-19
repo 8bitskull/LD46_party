@@ -1,6 +1,7 @@
 
 local h = require "utilities.h"
 
+
 function init(self)
 
 	math.randomseed(os.clock()*100000000000)
@@ -8,10 +9,14 @@ function init(self)
 	local x, y, w, h = defos.get_window_size()
 	defos.set_window_size(x-1400, y, w, h)
 
-	-- msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
+	-- msg.post("@render:", "use_stretch_projection", { near = -1, far = 1 })
+
+	--play the music
+	sound.play("#music")
+	sound.set_group_gain(hash("master"), 0.5)
 
 	--just start the game
-	msg.post("#game", "load")
+	msg.post("#start", "load")
 end
 
 function final(self)
@@ -27,7 +32,17 @@ end
 function on_message(self, message_id, message, sender)
 	
 	if message_id == h.PROXY_LOADED then
+		print("loaded", message_id, sender)
 		msg.post(sender, "init")
-        msg.post(sender, "enable")
+		msg.post(sender, "enable")
+	elseif message_id == h.GAMEOVER then
+		msg.post("#game", "unload")
+		msg.post("#gameover", "load")
+	elseif message_id == h.RESTART then
+		msg.post("#gameover", "unload")
+		msg.post("#game", "load")
+	elseif message_id == h.START then
+		msg.post("#start", "unload")
+		msg.post("#game", "load")
 	end
 end

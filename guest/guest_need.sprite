@@ -1,0 +1,4 @@
+tile_set: "/graphics/symbols.atlas"
+default_animation: "symbol_talk"
+material: "/defblend/materials/sprite/blend_normal.material"
+blend_mode: BLEND_MODE_ALPHA

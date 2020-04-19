@@ -2,11 +2,12 @@ local h = require "utilities.h"
 local utilities = require "utilities.utilities"
 local guest_manager = require "guest.guest_manager"
 local pathfinder = require "utilities.pathfinder"
+local party_supplies = require "party_supplies.party_supplies"
 
 local function assign_new_random_positions(self)
 
 	for object, info in pairs(guest_manager.guests) do
-		if not pathfinder.is_walk_in_progress(object) and object ~= self.clicked_object and math.random() > 0.5 then
+		if not pathfinder.is_walk_in_progress(object) and not info.leaving and not party_supplies.sound_system and object ~= self.clicked_object and math.random() > 0.5 then
 			guest_manager.assign_random_position(object)
 		end
 	end
@@ -14,10 +15,9 @@ end
 
 function init(self)
 	
-	--spawn
-	for i=1,2 do
-		guest_manager.spawn_guest()
-	end
+	guest_manager.reset_variables()
+
+	guest_manager.spawn_guest()
 
 	--assign initial positions
 	for object, info in pairs(guest_manager.guests) do
@@ -33,15 +33,23 @@ function final(self)
 end
 
 function update(self, dt)
+	
+	if guest_manager.get_num_guests() <= 0 then
+		msg.post("main:/loader", "gameover")
+	end
+	guest_manager.run_spawn(dt)
 	guest_manager.tick_guest_needs(dt)
 	guest_manager.manage_anim()
-	
+	guest_manager.check_for_leaving()
+
 	local clicked_object = guest_manager.check_guest_clicks()
 	if clicked_object then
 		self.clicked_object = clicked_object
-		msg.post("player", "go_to", {position = pathfinder.get_walk_destination(self.clicked_object)})
+		local position = pathfinder.cancel_walk(self.clicked_object)
+		msg.post("player", "go_to", {position = position})
 		msg.post("player", "guest_target", {id = self.clicked_object})
 	end
+
 end
 
 function on_message(self, message_id, message, sender)

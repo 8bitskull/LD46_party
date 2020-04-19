@@ -1,0 +1,49 @@
+
+local h = require "utilities.h"
+local pathfinder = require "utilities.pathfinder"
+local party_supplies = require "party_supplies.party_supplies"
+
+local function manage_anim(self)
+
+	local position = go.get_position()
+
+	sprite.set_hflip("#sprite", position.x > self.previous_position.x)
+
+	self.previous_position = position
+end
+
+function init(self)
+	self.previous_position = go.get_position()
+	self.delivery_completed = false
+	self.my_id = go.get_id()
+	go.set_position(vmath.vector3(pathfinder.offscreen_left_x, pathfinder.downstairs_y , pathfinder.outdoors_z))
+	pathfinder.walk_to(self.my_id, go.get_position(), vmath.vector3(pathfinder.delivery_x, pathfinder.downstairs_y, pathfinder.outdoors_z), true)
+
+	msg.post("#sprite", "play_animation", {id = hash("walk")})
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	
+	manage_anim(self)
+
+	if not pathfinder.is_walk_in_progress(self.my_id) then
+
+		if not self.delivery_completed then
+			party_supplies.deliver_powder()
+			self.delivery_completed = true
+			pathfinder.walk_to(self.my_id, go.get_position(), vmath.vector3(pathfinder.offscreen_right_x, pathfinder.downstairs_y, pathfinder.outdoors_z), true)
+		else
+			go.delete()
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Remove this function if not needed
+end

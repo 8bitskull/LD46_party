@@ -9,18 +9,19 @@ local h = require "utilities.h"
 local M = {}
 
 M.walk_speed = 80
-M.downstairs_y = -277
-M.upstairs_y = -51
-M.stairs_up_x = -300
-M.stairs_down_x = -138
-M.door_x = 86
+M.downstairs_y = 82
+M.upstairs_y = 317
+M.stairs_up_x = 342
+M.stairs_down_x = 483
+M.door_x = 723
+M.delivery_x = 788
 M.indoors_z = 0.1
 M.outdoors_z = 0.2
-M.left_x = -540
-M.right_x = 550
-M.upstairs_right_x = 287
-M.offscreen_left_x = -710
-M.offscreen_right_x = 684
+M.left_x = 117
+M.right_x = 1178
+M.upstairs_right_x = 918
+M.offscreen_left_x = -48
+M.offscreen_right_x = 1326
 
 M.walks = {}
 
@@ -84,6 +85,12 @@ function M.update_walk_cycle(self, object)
             pprint(M.walks)
             return
         end
+    end
+
+    if M.walks[object].stop_requested then
+        --we were asked to stop walking, but we were in the middle of the stairs so...
+        M.walks[object] = nil
+        return
     end
 
     local walk = M.walks[object]
@@ -172,6 +179,8 @@ function M.update_walk_cycle(self, object)
         end
     end
 
+    walk.partial_target_position = target_position
+
     local walk_time = vmath.length(target_position-go.get_position(walk.object)) / walk.walk_speed
 
     go.animate(walk.object, "position.x", go.PLAYBACK_ONCE_FORWARD, target_position.x, go.EASING_INOUTSINE, walk_time, 0, M.update_walk_cycle)
@@ -217,9 +226,22 @@ function M.get_walk_destination(object)
     end
 end
 
+---returns position of object, or end of the stairs
 function M.cancel_walk(object)
 
-    M.walks[object] = nil
+    if object == nil or M.walks[object] == nil then
+        print("PATHFINDER: Error, canceling walk of nil object or object is not walking")
+    end
+
+    if M.get_location(go.get_position(object)) ~= h.STAIRS then
+        M.walks[object] = nil
+        go.cancel_animations(object, "position.x")
+        go.cancel_animations(object, "position.y")
+        return go.get_position(object)
+    else
+        M.walks[object].stop_requested = true
+        return M.walks[object].partial_target_position
+    end
 end
 
 function M.is_walk_in_progress(object)

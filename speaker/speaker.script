@@ -1,0 +1,57 @@
+
+local party_supplies = require "party_supplies.party_supplies"
+
+go.property("is_main", 1)
+
+local function set_wobble(self)
+
+	local state = nil
+	if party_supplies.sound_system then
+		state = true
+	else
+		state = false
+	end
+
+	if state ~= self.previous_state then
+		go.set_scale(1)
+		if state then
+			go.animate(self.my_id, "scale", go.PLAYBACK_LOOP_PINGPONG, 1.1, go.EASING_INOUTCUBIC, 0.5)
+			if self.is_main == 0 then
+				particlefx.stop("#music_notes_normal")
+				particlefx.play("#music_notes_high")
+			end
+		else
+			go.animate(self.my_id, "scale", go.PLAYBACK_LOOP_PINGPONG, 1.02, go.EASING_INOUTCUBIC, 1)
+			if self.is_main == 0 then
+				particlefx.stop("#music_notes_high")
+				particlefx.play("#music_notes_normal")
+			end
+		end
+	end
+
+	self.previous_state = state
+end
+
+function init(self)
+	
+	if self.is_main == 0 then
+		msg.post("#sprite", "play_animation", {id = hash("speaker")})
+	end
+
+	self.my_id = go.get_id()
+	self.previous_state = nil
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	set_wobble(self)
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Remove this function if not needed
+end

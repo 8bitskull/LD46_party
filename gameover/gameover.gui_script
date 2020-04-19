@@ -1,0 +1,25 @@
+
+local h = require "utilities.h"
+local buttons = require "utilities.buttons"
+
+function init(self)
+	
+	self.button = buttons.add_button(h.GAMEOVER_BUTTON, gui.get_node("cocktail"), {flipbook_down = hash("cocktail_down"), scale_over_amount = 1.1, scale_over_time = 1, scale_over_easing = gui.EASING_INOUTCUBIC, scale_over_playback = gui.PLAYBACK_LOOP_PINGPONG, scale_down_amount = 0.9, scale_down_time = 0.2, scale_released_amount = 1, scale_released_time = 0.75, scale_released_easing = gui.EASING_OUTELASTIC, scale_released_playback = gui.PLAYBACK_ONCE_FORWARD})
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	
+	if buttons.check_button(h.GAMEOVER_BUTTON).released then
+		msg.post("main:/loader", "restart")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Remove this function if not needed
+end

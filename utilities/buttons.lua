@@ -83,7 +83,7 @@ function M.check_button(id)
 
     local button = M.buttons[id]
     if not button then
-        print ("BUTTONS: Error - no button id " .. id)
+        print ("BUTTONS: Error - no button id", id)
         return {released = false, over = false, down = false, doubleclick = false}
     end
 

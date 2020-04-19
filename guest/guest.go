@@ -13,6 +13,36 @@ components {
     w: 1.0
   }
 }
+components {
+  id: "guest_need"
+  component: "/guest/guest_need.factory"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+}
+components {
+  id: "sleep_particles"
+  component: "/guest/sleep_particles.particlefx"
+  position {
+    x: 0.0
+    y: 96.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+}
 embedded_components {
   id: "booze"
   type: "label"
