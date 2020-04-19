@@ -8,7 +8,7 @@ function init(self)
 	local x, y, w, h = defos.get_window_size()
 	defos.set_window_size(x-1400, y, w, h)
 
-	msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
+	-- msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
 
 	--just start the game
 	msg.post("#game", "load")

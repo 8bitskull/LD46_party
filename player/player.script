@@ -7,6 +7,28 @@ local party_supplies = require "party_supplies.party_supplies"
 
 go.property("allow_actions", true)
 
+local function manage_direction(self)
+
+	position = go.get_position()
+
+	sprite.set_hflip("#sprite", position.x > self.previous_position.x)
+
+	self.previous_position = position
+end
+
+local function manage_anim(self)
+
+	local anim = h.IDLE
+	if pathfinder.is_walk_in_progress(self.my_id) then
+		anim = h.WALK
+	end
+
+	if anim ~= self.anim then
+		msg.post("#sprite", "play_animation", {id = anim})
+	end
+	self.anim = anim
+end
+
 local function check_for_action_trigger(self)
 
 	local position = go.get_position()
@@ -30,6 +52,8 @@ end
 function init(self)
 
 	self.my_id = go.get_id()
+
+	self.previous_position = go.get_position()
 
 	self.walk_speed = pathfinder.walk_speed * 2
 
@@ -57,6 +81,9 @@ function update(self, dt)
 			self.guest_target = nil
 		end
 	end
+
+	manage_anim(self)
+	manage_direction(self)
 
 	if self.queued_action then
 		check_for_action_trigger(self)

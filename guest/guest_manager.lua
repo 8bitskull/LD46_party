@@ -21,8 +21,10 @@ function M.spawn_guest()
     local side_x = pathfinder.offscreen_right_x
 	if math.random() > 0.5 then 
 		side_x = pathfinder.offscreen_left_x 
-	end
-    go.set_position(vmath.vector3(side_x, pathfinder.downstairs_y, pathfinder.outdoors_z), guest)
+    end
+    local position = vmath.vector3(side_x, pathfinder.downstairs_y, pathfinder.outdoors_z)
+    go.set_position(position, guest)
+    M.guests[guest].previous_position = position
 
     --walk speed
     M.guests[guest].walk_speed = pathfinder.walk_speed * utilities.rand_between(0.9,1.1,false)
@@ -41,6 +43,9 @@ function M.spawn_guest()
     end
     go.set(sprite, "blend", color)
     M.guests[guest].color = color
+
+    --animation
+    M.guests[guest].anim = h.IDLE
 
     --starting value
     M.guests[guest].booze = 75 + 25 * math.random()
@@ -107,6 +112,29 @@ end
 function M.assign_random_position(guest)
 
     pathfinder.walk_to(guest, go.get_position(), pathfinder.random_position(), false, M.guests[guest].walk_speed)
+end
+
+function M.manage_anim()
+    local position = nil
+    local sprite_fragment = nil
+    local anim = h.IDLE
+    for object, info in pairs(M.guests) do
+
+        sprite_fragment = msg.url(object)
+        sprite_fragment.fragment = "sprite"
+        position = go.get_position(object)
+        sprite.set_hflip(sprite_fragment, position.x > info.previous_position.x)
+        info.previous_position = position
+
+        anim = h.IDLE
+        if pathfinder.is_walk_in_progress(object) then
+            anim = h.WALK
+        end
+        if anim ~= info.anim then
+            msg.post(sprite_fragment, "play_animation", {id = anim})
+        end
+        info.anim = anim
+    end
 end
 
 function M.delete_guest(object)

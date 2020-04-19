@@ -881,8 +881,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 40.0
-    y: 122.0
+    x: 80.0
+    y: 140.0
     z: 0.0
     w: 1.0
   }
@@ -894,7 +894,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "character/character"
+  texture: "character/dance"
   id: "character"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE

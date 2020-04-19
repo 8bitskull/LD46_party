@@ -2,6 +2,11 @@ local h = {}
 
 h.PROXY_LOADED = hash("proxy_loaded")
 
+h.IDLE = hash("idle")
+h.WALK = hash("walk")
+h.DANCE = hash("dance")
+h.DRINK = hash("drink")
+
 h.GO_TO = hash("go_to")
 h.QUEUED_ACTION = hash("queued_action")
 h.ACTION = hash("action")

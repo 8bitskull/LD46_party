@@ -1,6 +1,228 @@
-images {
-  image: "/graphics/character.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+animations {
+  id: "idle"
+  images {
+    image: "/graphics/characters0001.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_NONE
+  fps: 60
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "dance"
+  images {
+    image: "/graphics/characters0002.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0003.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0004.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0005.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0006.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0007.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0008.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0009.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walk"
+  images {
+    image: "/graphics/characters0010.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0011.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0012.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0013.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0014.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0015.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 14
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walk_left"
+  images {
+    image: "/graphics/characters0010.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0011.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0012.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0013.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0014.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0015.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 14
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walk_right"
+  images {
+    image: "/graphics/characters0010.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0011.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0012.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0013.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0014.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0015.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 14
+  flip_horizontal: 1
+  flip_vertical: 0
+}
+animations {
+  id: "drink"
+  images {
+    image: "/graphics/characters0016.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0017.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0018.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0019.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0020.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0021.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0022.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0023.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0024.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/graphics/characters0025.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 14
+  flip_horizontal: 0
+  flip_vertical: 0
 }
 margin: 0
 extrude_borders: 2

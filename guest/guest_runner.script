@@ -34,9 +34,11 @@ end
 
 function update(self, dt)
 	guest_manager.tick_guest_needs(dt)
+	guest_manager.manage_anim()
 	
-	self.clicked_object = guest_manager.check_guest_clicks()
-	if self.clicked_object then
+	local clicked_object = guest_manager.check_guest_clicks()
+	if clicked_object then
+		self.clicked_object = clicked_object
 		msg.post("player", "go_to", {position = pathfinder.get_walk_destination(self.clicked_object)})
 		msg.post("player", "guest_target", {id = self.clicked_object})
 	end
