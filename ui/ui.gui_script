@@ -250,6 +250,7 @@ function update(self, dt)
 
 		if buttons.check_button(self.character_cocktail).released then
 			if party_supplies.cocktails > 0 then
+				sound.play("player#drink")
 				party_supplies.cocktails = party_supplies.cocktails - 1
 				wobble_node(self, gui.get_node("inventory_cocktail"))
 				wobble_node(self, gui.get_node("char_cocktail_icon"))
@@ -277,6 +278,7 @@ function update(self, dt)
 				wobble_node(self, gui.get_node("inventory_powder"))
 				wobble_node(self, gui.get_node("char_powder_icon"))
 				guest_manager.guests[self.loaded_character].powder = 100
+				sound.play("player#sniff")
 				if party_supplies.powder == 0 then
 					msg.post("ui", "show_button", {id = h.PHONE})
 					msg.post("ui", "highlight_node", {node = "phone"})

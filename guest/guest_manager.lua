@@ -14,15 +14,15 @@ M.need_height = 150
 M.need_threshold = 60
 
 M.neediness_multiplier_min = 1
-M.neediness_multiplier_max = 2
-M.neediness_multiplier_max_guests = 50
+M.neediness_multiplier_max = 3
+M.neediness_multiplier_max_guests = 20
 
 function M.reset_variables()
 
     M.guests_spawned = 0
     M.guest_spawn_timer = 0
-    M.guest_spawn_timer_max = 6
-    M.guest_spawn_increment = 4
+    M.guest_spawn_timer_max = 5
+    M.guest_spawn_increment = 6
 
     M.guests = {}
 
@@ -92,9 +92,9 @@ function M.spawn_guest()
     --rate per minute
     M.guests[guest].booze_rate = (10 + 10 * math.random()) * neediness_multiplier
     M.guests[guest].powder_rate = (10 + 10 * math.random()) * neediness_multiplier
-    M.guests[guest].dance_rate = (20 + 10 * math.random()) * neediness_multiplier
+    M.guests[guest].dance_rate = (25 + 10 * math.random()) * neediness_multiplier
     M.guests[guest].talk_rate = (5 + 5 * math.random()) * neediness_multiplier
-    M.guests[guest].neediness_rate = 1
+    M.guests[guest].neediness_rate = 1.5
 
     M.guests[guest].booze_rate = M.guests[guest].booze_rate / 60
     M.guests[guest].powder_rate = M.guests[guest].powder_rate / 60

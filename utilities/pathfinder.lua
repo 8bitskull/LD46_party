@@ -98,7 +98,7 @@ function M.update_walk_cycle(self, object)
     local current_position = go.get_position(walk.object)
     local current_location = M.get_location(current_position)
 
-    print("walk checkpoint", current_location, current_position)
+    -- print("walk checkpoint", current_location, current_position)
 
     local target_position = walk.final_position
 

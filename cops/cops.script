@@ -1,4 +1,5 @@
 
+local utilities = require "utilities.utilities"
 local h = require "utilities.h"
 local pathfinder = require "utilities.pathfinder"
 local party_supplies = require "party_supplies.party_supplies"
@@ -17,7 +18,7 @@ local function manage_time(self, dt)
 	if party_supplies.sound_system then
 		self.music_time = self.music_time + dt
 	else
-		self.music_time = self.music_time - dt
+		self.music_time = utilities.clamp(self.music_time - dt,0,self.music_time)
 	end
 
 	if self.music_time >= self.music_limit and not self.walking_to_door and party_supplies.sound_system then
